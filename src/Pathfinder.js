@@ -1,5 +1,7 @@
 import BinaryHeap from './BinaryHeap';
 
+// NOT A CLASS/CONSTRUCTOR
+// JUST A FUNCTION
 // takes a maze, start point, and end point
 // returns an array of points as an ending path
 // return empty array if fails to find solution

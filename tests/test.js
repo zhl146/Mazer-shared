@@ -1,5 +1,5 @@
 import MazeTests from './maze.test';
-import PointTests from './point.test';
+import PointTests from './Point.test';
 
 let unitTests = [];
 unitTests.push(new MazeTests());
