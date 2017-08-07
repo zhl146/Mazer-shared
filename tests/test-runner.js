@@ -1,4 +1,4 @@
-import MazeTests from './maze.test';
+import MazeTests from './Maze.test';
 import PointTests from './Point.test';
 
 let unitTests = [];
