@@ -5,8 +5,8 @@ let unitTests = [];
 unitTests.push(new MazeTests());
 unitTests.push(new PointTests());
 
-unitTests.forEach(function(unitTest){
-    unitTest.unitTests();
+unitTests.forEach( (unitTest) => {
+  unitTest.runTests();
 });
 
 
