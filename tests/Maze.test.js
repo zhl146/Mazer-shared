@@ -17,6 +17,5 @@ export default class MazeTest {
 
   runTests(){
     test('testing the constructor for mazer', this.mazeConstructorTest);
-
   }
 }

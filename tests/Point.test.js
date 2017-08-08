@@ -1,6 +1,6 @@
 "use strict";
 import test from 'tape';
-import Point from '../src/Point'
+import Point from '../src/MazeTile'
 
 export default class PointTest {
   constructor(){
