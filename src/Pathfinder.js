@@ -25,15 +25,13 @@ export default function Pathfinder(maze, start, end) {
     const closedSet = new PointSet();
 
     // list of tiles to explore
-    let openSet = new BinaryHeap(function ( point ) {
-        return point.f;
-    });
+    let openSet = new BinaryHeap( point => point.f );
 
-    const gTracker = new Array(maze.ysize);
+    const gTracker = new Array(maze.params.numRows);
 
-    for (let i = 0; i < maze.ysize; i++ ) {
-        gTracker[i] = new Array(maze.xsize);
-        for (let j = 0; j < maze.xsize; j++) {
+    for (let i = 0; i < maze.params.numRows; i++ ) {
+        gTracker[i] = new Array(maze.params.numColumns);
+        for (let j = 0; j < maze.params.numColumns; j++) {
             gTracker[i][j] = -1;
         }
     }
