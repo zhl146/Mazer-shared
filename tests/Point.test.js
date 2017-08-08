@@ -51,4 +51,5 @@ export default class PointTest {
     test('the point should copy correctly and match', this.copyTest);
     test('the point should calculate the value of g correctly', this.setFGHTest);
   }
+
 }
