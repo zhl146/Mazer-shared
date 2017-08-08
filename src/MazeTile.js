@@ -1,4 +1,4 @@
-export default class MazePoint{
+export default class MazeTile{
   constructor(x, y, type){
     // coordinates
     this.x = x;
@@ -26,7 +26,7 @@ export default class MazePoint{
   }
 
   copy() {
-    return new MazePoint(this.x, this.y);
+    return new MazeTile(this.x, this.y);
   }
 
   matches(pointToCompare) {
@@ -52,15 +52,20 @@ export default class MazePoint{
   }
 
   isEmpty() {
-    return this.type === MazePoint.Type.Empty;
+    return this.type === MazeTile.Type.Empty;
   };
 
   incrementScoreMod(amount) {
     this.scoreMod += amount;
   }
+
+  toggleType() {
+    this.type = !this.type;
+  }
+
 }
 
-MazePoint.Type = {
+MazeTile.Type = {
   Empty: 0,
   Blocker: 1,
 };

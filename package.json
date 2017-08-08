@@ -4,7 +4,8 @@
   "description": "a library that holds shared validation code for the mazer client and backend",
   "main": "index.js",
   "scripts": {
-    "test": "babel-node tests/test-runner.js | ./node_modules/faucet/bin/cmd.js",
+    "test": "babel-node tests/test-runner.js --inspect",
+    "test-faucet": "babel-node tests/test-runner.js | ./node_modules/faucet/bin/cmd.js",
     "build": "babel src --presets babel-preset-es2015 --out-dir dist"
   },
   "author": "Zhen Lu, Eddie Lu, Paul Sabatino",

@@ -11,12 +11,11 @@ export default function Maze(seed) {
 
   // initialize maze params
   this.params = this.generateMazeParams();
-
-  this.unusedPoints = this.generateUnusedPointsArray();
   this.mazeTiles = this.generateEmptyMaze();
+  this.unusedPoints = this.generateUnusedPointsArray();
   this.wayPoints = this.generateWayPoints();
-  this.generateScoreZones();
-  this.mazeTiles = this.generateBlockers();
+  this.generateScoreZones()
+      .generateBlockers();
 };
 
 // make sure that the point is in the bounds
@@ -102,7 +101,6 @@ Maze.prototype.generateWayPoints = function() {
   }
 
   // the leftover points are the waypoints
-  //console.log("Maze currently has this as pathVerticies: "+JSON.stringify(pathVertices));
   return pathVertices;
 
 };
@@ -128,7 +126,7 @@ Maze.prototype.generateBlockers = function() {
   });
 
   seedPoints.forEach( (point) => blockerPoints.push(point) );
-  blockerPoints.forEach( (point) => this.setBlocker(point) );
+  blockerPoints.forEach( (blockerPoint) => this.mazeTiles[blockerPoint.y][blockerPoint.x].toggleType() );
 };
 
 // gets some random points to place as seeds
@@ -160,18 +158,19 @@ Maze.prototype.setBlocker = function(point) {
 // calculates all points that changed and the operation to change them
 Maze.prototype.getUserChanges = function(userMaze) {
   const diffPoints = [];
-  const changedMaze = userMaze.maze;
+  const changedMaze = userMaze.mazeTiles;
 
-  for (let row = 0; row < this.params.numRows; row++) {
-    for (let column = 0; column < this.params.numColumns; column++ ){
-      const operationType = changedMaze[row][column].type - this.mazeTiles[row][column].type;
+  changedMaze.forEach( (column, columnIndex) => {
+    column.forEach( (row, rowIndex) => {
+      const operationType = changedMaze[rowIndex][columnIndex].type - this.mazeTiles[rowIndex][columnIndex].type;
       if ( operationType !== 0 ) {
         const newPoint = new Tile(column, row);
         newPoint.operationType = operationType;
         diffPoints.push(newPoint);
       }
-    }
-  }
+    })
+  });
+
   return diffPoints;
 };
 
@@ -267,13 +266,13 @@ Maze.prototype.generateColors = function() {
 Maze.prototype.generateUnusedPointsArray = function() {
   // this creates a 1-D list of all points on our maze
   let unusedPointsArray = [];
-  let newPoint;
-  for (let row = 0; row < this.params.numRows; row++) {
-    for (let col = 0; col < this.params.numColumns; col++) {
-      newPoint = new Tile(col, row);
-      unusedPointsArray.push(newPoint);
-    }
-  }
+
+  this.mazeTiles.forEach( (column) => {
+    column.forEach( (tile) => {
+      unusedPointsArray.push(tile);
+    })
+  });
+
   return unusedPointsArray;
 };
 
@@ -340,15 +339,14 @@ Maze.prototype.getScoreMod = function(point) {
 
 Maze.prototype.generateScoreZones = function() {
   const scoreSeeds = this.generateSeedPoints(this.params.numScoringZones);
-  const scoreSizeArray = [];
 
-  scoreSeeds.forEach( (seed) => {
-    scoreSizeArray.push( this.generateRandomIntBetween(2, 6) );
-    this.setScoreZoneCenter(seed);
+  scoreSeeds.forEach( ( seedPoint ) => {
+    let scoreSize = this.generateRandomIntBetween(2, 6);
+    this.expandScoreZone(scoreSize, 7 - scoreSize, seedPoint);
+    this.setScoreZoneCenter(seedPoint);
   });
-  for (let i = 0; i < scoreSeeds.length; i++) {
-    this.expandScoreZone(scoreSizeArray[i], 7 - scoreSizeArray[i], scoreSeeds[i]);
-  }
+
+  return this;
 };
 
 Maze.prototype.expandScoreZone = function(zoneSize, zoneModifier, seedPoint) {

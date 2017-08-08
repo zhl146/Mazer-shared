@@ -12,6 +12,8 @@ export default class MazeTest {
     let testMaze2 = new Maze(3000);
     assert.notEqual(testMaze1.random, null, 'testmaze 1 has a valid random value');
     assert.equal(testMaze1.random(), testMaze2.random(), 'testmaze 1 and testmaze 2 generate the same random number given the same seed');
+    assert.notEqual(testMaze1.mazeTiles, undefined);
+    assert.notEqual(testMaze1.mazeTiles, null);
     assert.end();
   }
 
