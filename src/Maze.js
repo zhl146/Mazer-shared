@@ -1,8 +1,9 @@
 import seedrandom from 'seedrandom';
+import ColorScheme from 'color-scheme';
+
 import Tile from './MazeTile';
 import Pathfinder from './Pathfinder';
-
-import ColorScheme from 'color-scheme';
+import Utils from './Utils';
 
 export default function Maze(seed) {
   let i;
@@ -29,7 +30,7 @@ Maze.prototype.isPassable = function(point) {
 // and make sure that it's not a waypoint (waypoints shouldn't be messed with)
 Maze.prototype.isModifiable = function(point) {
   return this.contains(point) &&
-      !this.wayPoints.containsPoint(point);
+      !Utils.arrayContainsPoint(this.wayPoints, point);
 };
 
 // makes sure that the point is in the bounds of the maze
@@ -69,7 +70,7 @@ Maze.prototype.generateWayPoints = function() {
   let savedPoints = [];
   while ( pathVertices.length < this.params.numPathVertexes ) {
     newPoint = this.generateNewPoint();
-    if (pathVertices.pointIsAtLeastThisFar(newPoint, 2) ) {
+    if (Utils.arrayIsFarEnough(pathVertices, newPoint, 2) ) {
       pathVertices.push(newPoint);
     } else {
       savedPoints.push(newPoint);
@@ -85,14 +86,13 @@ Maze.prototype.generateWayPoints = function() {
       // Shift so that the path so that it's continuous (end of previous equals start of next)
       pathSegment.shift();
     }
-    pathSegment.forEach( (point) => protectedPath.push(point) );
+    pathSegment.forEach( (point) => {
+        protectedPath.push(point);
+        // we shouldn't put anything where the protected path is
+        // so they are removed from the unused points array
+        this.unusedPoints = Utils.removePointInArray(this.unusedPoints, point);
+    });
   }
-
-  // we shouldn't put anything where the protected path is
-  // so they are removed from the unused points array
-  protectedPath.forEach( (point) => {
-    this.unusedPoints = this.removePointInArray(this.unusedPoints, point);
-  });
 
   // Select random vertices to delete, excluding start and end
   while (pathVertices.length > this.params.numWayPoints + 2) {
@@ -120,7 +120,7 @@ Maze.prototype.generateBlockers = function() {
       const threshold = Math.exp( -seedDecayFactor * distance );
       if ( this.random() < threshold ) {
         blockerPoints.push(unusedPoint);
-        this.unusedPoints.removePoint(unusedPoint);
+        Utils.removePointInArray(this.unusedPoints, unusedPoint);
       }
     })
   });
@@ -144,7 +144,9 @@ Maze.prototype.findPath = function() {
 
   for (let i = 0; i < this.wayPoints.length - 1; i++) {
     const segment = Pathfinder(this, this.wayPoints[i], this.wayPoints[i + 1]);
-    path.push(segment);
+    if (segment !== []) {
+        path.push(segment);
+    }
   }
 
   return path;
@@ -160,11 +162,12 @@ Maze.prototype.getUserChanges = function(userMaze) {
   const diffPoints = [];
   const changedMaze = userMaze.mazeTiles;
 
-  changedMaze.forEach( (column, columnIndex) => {
-    column.forEach( (row, rowIndex) => {
-      const operationType = changedMaze[rowIndex][columnIndex].type - this.mazeTiles[rowIndex][columnIndex].type;
+  changedMaze.forEach( (row, rowIndex) => {
+    row.forEach( (column, colIndex) => {
+        //console.log(rowIndex + ',' + colIndex)
+      const operationType = changedMaze[rowIndex][colIndex].type - this.mazeTiles[rowIndex][colIndex].type;
       if ( operationType !== 0 ) {
-        const newPoint = new Tile(column, row);
+        const newPoint = new Tile(colIndex, rowIndex);
         newPoint.operationType = operationType;
         diffPoints.push(newPoint);
       }
@@ -280,7 +283,8 @@ Maze.prototype.generateUnusedPointsArray = function() {
 // only use for user actions because it changes the userPlaced flag
 Maze.prototype.doActionOnTile = function(point) {
   if (!this.isModifiable(point)) {
-    return false;
+      console.log("can't do action on tile!");
+      return false;
   }
 
   const tile = this.mazeTiles[point.y][point.x];
@@ -289,6 +293,7 @@ Maze.prototype.doActionOnTile = function(point) {
   // to do the desired action
   const operationCost = this.operationCostForActionOnTile(tile);
   if (this.actionsUsed + operationCost > this.params.maxActionPoints) {
+      console.log("can't do action on tile!");
     return false;
   }
 
@@ -319,11 +324,6 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
   }
 
   return operationCost
-};
-
-// returns an array with the point removed from it
-Maze.prototype.removePointInArray = function(array, pointToRemove) {
-  return array.filter( (pointInArray) => !pointInArray.matches(pointToRemove) );
 };
 
 // creates an 0'ed array of the desired length
@@ -373,59 +373,30 @@ Maze.prototype.setScoreZoneCenter = function(point) {
   this.mazeTiles[point.y][point.x].scoreZoneCenter = true;
 };
 
-Maze.prototype.getAdjacent = function(startPoint, endPoint) {
-  const self = this;
+Maze.prototype.getAdjacent = function(currentPoint, endPoint) {
   const pointArray = [];
-  let newPoint;
 
-  const addPoint = function ( newPoint, isDiagonal ) {
-    if (self.isPassable(newPoint)) {
-      newPoint.setParent(self);
-      newPoint.setG(isDiagonal ? 14 : 10);
-      newPoint.setH(endPoint);
-      newPoint.setF();
-      pointArray.push(newPoint)
-    }
-  };
+  const addPoint = function (parent, newPoint, isDiagonal ) {
+        //console.log("params is: "+JSON.stringify(this.params));
+        if (this.isPassable(newPoint)) {
+          newPoint.setParent(parent);
+          newPoint.setG(isDiagonal ? 14 : 10);
+          newPoint.setH(endPoint);
+          newPoint.setF();
+          pointArray.push(newPoint)
+        }
+  }.bind(this);
 
-  newPoint = new Tile( startPoint.x, startPoint.y + 1 );
-  addPoint(newPoint, false);
-  newPoint = new Tile( startPoint.x + 1, startPoint.y + 1 );
-  addPoint(newPoint, true);
-  newPoint = new Tile( startPoint.x + 1, startPoint.y );
-  addPoint(newPoint, false);
-  newPoint = new Tile( startPoint.x + 1, startPoint.y - 1 );
-  addPoint(newPoint, true);
-  newPoint = new Tile( startPoint.x, startPoint.y - 1 );
-  addPoint(newPoint, false);
-  newPoint = new Tile( startPoint.x - 1, startPoint.y - 1 );
-  addPoint(newPoint, true);
-  newPoint = new Tile( startPoint.x - 1, startPoint.y );
-  addPoint(newPoint, false);
-  newPoint = new Tile( startPoint.x - 1, startPoint.y + 1 );
-  addPoint(newPoint, true);
+  for(let i=-1; i<=1; i++){
+      for(let j=-1; j<=1; j++){
+          if(i===0 && j===0) continue;
+          addPoint(
+              currentPoint,
+              new Tile( currentPoint.x + i, currentPoint.y + j ),
+              false
+          );
+      }
+  }
 
   return pointArray;
-};
-
-// extra array functions to test arrays with points
-
-Array.prototype.pointIsAtLeastThisFar = function(point, distance) {
-  // every only returns true only if every element in the tested array pasts to callback function test
-  return this.every( (pointInArray) => pointInArray.calculateDistance(point) > distance );
-};
-
-Array.prototype.containsPoint = function(pointToCheck) {
-  return ( this.indexOfPoint(pointToCheck) >= 0 );
-};
-
-Array.prototype.indexOfPoint = function(pointToFind) {
-  // findIndex method returns index of the first element in the array that satisfies the the callback
-  // otherwise returns -1
-  return this.findIndex( (pointInArray) => pointInArray.matches(pointToFind) );
-};
-
-Array.prototype.removePoint = function(pointToRemove) {
-  // returns a new array with elements that match the callback
-  this.filter( (pointInArray) => !pointInArray.matches(pointToRemove) );
 };

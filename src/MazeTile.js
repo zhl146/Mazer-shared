@@ -1,3 +1,5 @@
+import Maze from "./Maze";
+
 export default class MazeTile{
   constructor(x, y, type){
     // coordinates
@@ -8,7 +10,7 @@ export default class MazeTile{
     this.parent = null;
     this.g = null;
     this.f = null;
-    this.type = type || null;
+    this.type = type || MazeTile.Type.Empty;
 
     // stuff for presentation
     this.userPlaced = false;
@@ -60,7 +62,7 @@ export default class MazeTile{
   }
 
   toggleType() {
-    this.type = !this.type;
+    this.type = (this.type === MazeTile.Type.Empty? MazeTile.Type.Blocker: MazeTile.Type.Empty);
   }
 
 }
