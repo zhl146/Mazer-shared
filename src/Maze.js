@@ -11,12 +11,14 @@ export default function Maze(seed) {
   this.seed = seed;
 
   // initialize maze params
+  this.actionsUsed = 0;
   this.params = this.generateMazeParams();
   this.mazeTiles = this.generateEmptyMaze();
   this.unusedPoints = this.generateUnusedPointsArray();
   this.wayPoints = this.generateWayPoints();
-  this.generateScoreZones()
-      .generateBlockers();
+  this.setWayPointTypes()
+    .generateScoreZones()
+    .generateBlockers();
 };
 
 // make sure that the point is in the bounds
@@ -29,6 +31,9 @@ Maze.prototype.isPassable = function(point) {
 // make sure that the point is in the bounds
 // and make sure that it's not a waypoint (waypoints shouldn't be messed with)
 Maze.prototype.isModifiable = function(point) {
+    console.log('the point you are trying to change is: x: ' + point.x + 'y: ' + point.y)
+    if (!this.contains(point)) {console.log('maze does not contain point')}
+    if (Utils.arrayContainsPoint(this.wayPoints, point)) {console.log('this point is a waypoint')}
   return this.contains(point) &&
       !Utils.arrayContainsPoint(this.wayPoints, point);
 };
@@ -103,6 +108,24 @@ Maze.prototype.generateWayPoints = function() {
   // the leftover points are the waypoints
   return pathVertices;
 
+};
+
+Maze.prototype.setWayPointTypes = function() {
+    this.wayPoints.forEach( (waypoint, index) => {
+        if ( index === 0 ) {
+           this.setTileType( waypoint, Tile.Type.Start );
+        } else if ( index === this.wayPoints.length - 1) {
+            this.setTileType( waypoint, Tile.Type.End );
+        } else {
+            waypoint.waypointIndex = index;
+            this.setTileType( waypoint,  Tile.Type.WayPoint );
+        }
+    })
+    return this;
+};
+
+Maze.prototype.setTileType = function(point, type) {
+    this.mazeTiles[point.y][point.x].type = type;
 };
 
 // generates a list of tiles that should have blockers placed on them
@@ -282,9 +305,9 @@ Maze.prototype.generateUnusedPointsArray = function() {
 // Flips the tile type. Returns true for success, false for failure.
 // only use for user actions because it changes the userPlaced flag
 Maze.prototype.doActionOnTile = function(point) {
-  if (!this.isModifiable(point)) {
-      console.log("can't do action on tile!");
-      return false;
+  if(point.type !== Tile.Type.Empty && point.type !== Tile.Type.Blocker){
+    console.log("tile is not modifiable; can't do action on tile");
+    return false;
   }
 
   const tile = this.mazeTiles[point.y][point.x];
@@ -293,7 +316,7 @@ Maze.prototype.doActionOnTile = function(point) {
   // to do the desired action
   const operationCost = this.operationCostForActionOnTile(tile);
   if (this.actionsUsed + operationCost > this.params.maxActionPoints) {
-      console.log("can't do action on tile!");
+      console.log("not enough action points; can't do action on tile");
     return false;
   }
 

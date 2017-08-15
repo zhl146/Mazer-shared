@@ -12,6 +12,7 @@ module.exports = {
   MazeTile: function(type) {
     return new MazeTile(type);
   },
+  MazeTileEnum: MazeTile.Type,
   Score: function(baseMaze) {
     return new Score(baseMaze);
   },

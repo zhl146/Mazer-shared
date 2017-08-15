@@ -36,7 +36,7 @@ export default class ScoreTest{
 
     testCalculateScore(assert){
         let numericScore = this.Score.calculateScore(this.changedMaze);
-        assert.equal(numericScore, -1543);
+        assert.equal(numericScore, 0);
         assert.end();
     }
 

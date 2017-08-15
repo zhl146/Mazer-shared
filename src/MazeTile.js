@@ -11,7 +11,7 @@ export default class MazeTile{
     this.g = null;
     this.f = null;
     this.type = type || MazeTile.Type.Empty;
-
+    this.waypointIndex = null;
     // stuff for presentation
     this.userPlaced = false;
 
@@ -70,4 +70,7 @@ export default class MazeTile{
 MazeTile.Type = {
   Empty: 0,
   Blocker: 1,
+  Start: 2,
+  End: 3,
+  WayPoint: 4
 };
