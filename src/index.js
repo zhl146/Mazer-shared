@@ -1,7 +1,7 @@
-import Maze from 'Maze';
-import Pathfinder from 'Pathfinder';
-import Score from 'Score';
-import MazeTile from 'MazeTile';
+import Maze from './Maze';
+import Pathfinder from './Pathfinder';
+import Score from './Score';
+import MazeTile from './MazeTile';
 
 // exposes the useful parts of the library
 

@@ -1,8 +1,8 @@
 {
   "name": "mazer-shared",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "a library that holds shared validation code for the mazer client and backend",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "babel-node tests/test-runner.js --inspect",
     "test-faucet": "babel-node tests/test-runner.js | ./node_modules/faucet/bin/cmd.js",
