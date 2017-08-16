@@ -25,7 +25,7 @@ export default function Maze(seed) {
 // and make sure that it is empty
 Maze.prototype.isPassable = function(point) {
   return this.contains(point) &&
-      this.mazeTiles[point.y][point.x].isEmpty();
+      this.mazeTiles[point.y][point.x].isClear();
 };
 
 // make sure that the point is in the bounds

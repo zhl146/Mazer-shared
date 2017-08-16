@@ -53,8 +53,8 @@ export default class MazeTile{
     this.f = this.g + this.h;
   }
 
-  isEmpty() {
-    return this.type === MazeTile.Type.Empty;
+  isClear() {
+    return this.type !== MazeTile.Type.Blocker;
   };
 
   incrementScoreMod(amount) {
