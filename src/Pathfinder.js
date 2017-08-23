@@ -63,6 +63,7 @@ export default function Pathfinder(maze, startTile, endTile) {
     if ( currentPoint.x === endPoint.x && currentPoint.y === endPoint.y ) {
       const path = [];
       let node = currentPoint;
+      path.unshift(node);
       while (node.parent) {
         path.unshift(node.parent);
         node = node.parent;
@@ -79,7 +80,7 @@ export default function Pathfinder(maze, startTile, endTile) {
         if (i === 0 && j === 0) continue;
         const x = currentPoint.x + i;
         const y = currentPoint.y + j;
-        const cost = Math.abs(currentPoint.x + i) + Math.abs(currentPoint.y + j) === 2 ? 14 : 10;
+        const cost = Math.abs(i) + Math.abs(j) === 2 ? 14 : 10;
         if (pathGrid[y] && pathGrid[y][x] && !pathGrid[y][x].blocked) {
           pathGrid[y][x].cost = cost;
           pointArray.push(pathGrid[y][x])
@@ -102,20 +103,18 @@ export default function Pathfinder(maze, startTile, endTile) {
 
         // Found an optimal (so far) path to this node.  Take score for node to see how good it is.
         neighbor.visited = true;
+
+        // if we've been here before, we need to remove it before adding it again with a new gScore
+        if (neighbor.visited) {
+          openSet.remove(neighbor);
+        }
+
         neighbor.parent = currentPoint;
-        neighbor.h = neighbor.h || Math.abs(currentPoint.x - endPoint.x) + Math.abs(currentPoint.y - endPoint.y);
+        neighbor.h = neighbor.h || 10 * (Math.abs(currentPoint.x - endPoint.x) + Math.abs(currentPoint.y - endPoint.y));
         neighbor.g = gScore;
         neighbor.f = neighbor.g + neighbor.h;
 
-        if (!neighbor.visited) {
-          // Pushing to heap will put it in proper place based on the 'f' value.
-          openSet.push(neighbor);
-        }
-        else {
-          // Already seen the node, but since it has been rescored we need to reorder it in the heap
-          openSet.remove(neighbor);
-          openSet.push(neighbor);
-        }
+        openSet.push(neighbor);
       }
     })
   }
