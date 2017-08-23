@@ -1,6 +1,6 @@
 {
   "name": "mazer-shared",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "a library that holds shared validation code for the mazer client and backend",
   "main": "dist/index.js",
   "scripts": {
