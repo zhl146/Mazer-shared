@@ -14,14 +14,6 @@ export default class PointTest {
     assert.end();
   }
 
-  parentTest(assert){
-    let samplePointA = new Point(10, 10);
-    let samplePointB = new Point(10, 11);
-    samplePointA.setParent(samplePointB);
-    assert.deepEqual(samplePointB, samplePointA.parent, 'tests setParent method');
-    assert.end();
-  }
-
   copyTest(assert){
     let samplePointA = new Point(10, 10);
     let samplePointB = samplePointA.copy();
@@ -29,27 +21,9 @@ export default class PointTest {
     assert.end();
   }
 
-  setFGHTest(assert){
-    let samplePointA = new Point(10, 10);
-    samplePointA.g = 15;
-    let samplePointB = new Point(12, 12);
-    samplePointB.setParent(samplePointA);
-    samplePointB.setG(10);
-    samplePointB.setH(samplePointA);
-    samplePointB.setF();
-    assert.equal(samplePointB.g, 25);
-    assert.equal(samplePointB.h, 28);
-    assert.equal(samplePointB.f, 53);
-    assert.end();
-  }
-
-
-
   runTests(){
     test('the point should report the correct x and y coordinates', this.valueStorageTest);
-    test('the point should record parent correctly', this.parentTest);
     test('the point should copy correctly and match', this.copyTest);
-    test('the point should calculate the value of g correctly', this.setFGHTest);
   }
 
 }

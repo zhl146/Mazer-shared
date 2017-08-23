@@ -175,6 +175,14 @@ Maze.prototype.findPath = function() {
   return path;
 };
 
+Maze.prototype.setPath = function(path) {
+  path.forEach( (segment) => {
+    segment.forEach( (point) => {
+      this.mazeTiles[point.y][point.x].type = Tile.Type.Path
+    })
+  })
+};
+
 // change a maze tile to blocker type
 Maze.prototype.setBlocker = function(point) {
   this.mazeTiles[point.y][point.x].type = Tile.Type.Blocker;
@@ -394,32 +402,4 @@ Maze.prototype.incrementScoreZone = function(point, amount) {
 
 Maze.prototype.setScoreZoneCenter = function(point) {
   this.mazeTiles[point.y][point.x].scoreZoneCenter = true;
-};
-
-Maze.prototype.getAdjacent = function(currentPoint, endPoint) {
-  const pointArray = [];
-
-  const addPoint = function (parent, newPoint, isDiagonal ) {
-        //console.log("params is: "+JSON.stringify(this.params));
-        if (this.isPassable(newPoint)) {
-          newPoint.setParent(parent);
-          newPoint.setG(isDiagonal ? 14 : 10);
-          newPoint.setH(endPoint);
-          newPoint.setF();
-          pointArray.push(newPoint)
-        }
-  }.bind(this);
-
-  for(let i=-1; i<=1; i++){
-      for(let j=-1; j<=1; j++){
-          if(i===0 && j===0) continue;
-          addPoint(
-              currentPoint,
-              new Tile( currentPoint.x + i, currentPoint.y + j ),
-              false
-          );
-      }
-  }
-
-  return pointArray;
 };

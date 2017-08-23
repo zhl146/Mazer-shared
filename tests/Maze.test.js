@@ -21,8 +21,10 @@ export default class MazeTest {
 
     mazePathTest(assert) {
         const testMaze1 = new Maze(Math.random());
+        const path = testMaze1.findPath();
         assert.notDeepEqual(testMaze1.findPath(), [], 'there should be a valid path between all waypoints in a maze');
-        //console.log(testMaze1.findPath());
+        assert.equal(testMaze1.wayPoints[0].x, path[0][0].x);
+      assert.equal(testMaze1.wayPoints[0].y, path[0][0].y);
         assert.end();
     }
 
