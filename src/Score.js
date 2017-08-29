@@ -6,9 +6,9 @@ export default function Score(baseMaze) {
 
 // Returns an integer indicating the user's score. If negative, there was
 // a problem applying the user's actions (cheating or bug).
-Score.prototype.calculateScore = function(maze) {
+Score.prototype.calculateScore = function(adjustedPath) {
     // use the new maze to calculate the user's submitted path
-    const adjustedPath = maze.findPath();
+    //const adjustedPath = maze.findPath();
 
     const unadjustedScore = Math.floor(this.calculatePathLength(adjustedPath)*100);
     return unadjustedScore - this.baseScore;
