@@ -1,5 +1,5 @@
 import Maze from './Maze';
-import Pathfinder from './Pathfinder';
+import Pathfinder from './Pathfinder_deprecated';
 import Score from './Score';
 import MazeTile from './MazeTile';
 

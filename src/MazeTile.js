@@ -29,7 +29,7 @@ export default class MazeTile{
     return ( this.x === pointToCompare.x && this.y === pointToCompare.y );
   }
 
-  isClear() {
+  isWalkable() {
     return this.type !== MazeTile.Type.Blocker;
   };
 

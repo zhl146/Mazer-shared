@@ -1,12 +1,11 @@
 import seedrandom from 'seedrandom';
 import ColorScheme from 'color-scheme';
 
-import Tile from './MazeTile';
 import Pathfinder from './Pathfinder';
+import Tile from './MazeTile';
 import Utils from './Utils';
 
 export default function Maze(seed) {
-  let i;
   this.random = seedrandom(seed);
   this.seed = seed;
 
@@ -25,7 +24,7 @@ export default function Maze(seed) {
 // and make sure that it is empty
 Maze.prototype.isPassable = function(point) {
   return this.contains(point) &&
-      this.mazeTiles[point.y][point.x].isClear();
+      this.mazeTiles[point.y][point.x].isWalkable();
 };
 
 // make sure that the point is in the bounds
@@ -86,11 +85,12 @@ Maze.prototype.generateWayPoints = function() {
 
   // connect vertexes with path to create a random protected path between the start and end
   for (let i = 0; i < this.params.numPathVertexes - 1; i++) {
-    const pathSegment = Pathfinder(this, pathVertices[i], pathVertices[i + 1]);
+    const pathSegment = Pathfinder.findPath(pathVertices[i], pathVertices[i + 1], this.mazeTiles);
     if (i !== 0) {
       // Shift so that the path so that it's continuous (end of previous equals start of next)
       pathSegment.shift();
     }
+
     pathSegment.forEach( (point) => {
         protectedPath.push(point);
         // we shouldn't put anything where the protected path is
@@ -166,12 +166,12 @@ Maze.prototype.findPath = function() {
   const path = [];
 
   for (let i = 0; i < this.wayPoints.length - 1; i++) {
-    const segment = Pathfinder(this, this.wayPoints[i], this.wayPoints[i + 1]);
+    const segment = Pathfinder.findPath(this.wayPoints[i], this.wayPoints[i + 1], this.mazeTiles);
+
     if (segment !== []) {
         path.push(segment);
     }
   }
-
   return path;
 };
 
