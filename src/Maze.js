@@ -4,7 +4,6 @@ import ColorScheme from 'color-scheme';
 import Pathfinder from './Pathfinder';
 import Tile from './MazeTile';
 import Utils from './Utils';
-import Score from "./Score";
 
 export default function Maze(seed) {
   this.random = seedrandom(seed);
