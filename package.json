@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "babel-tape-runner \"tests/*.test.js\"",
-    "test-faucet": "babel-node tests/test-runner.js | ./node_modules/faucet/bin/cmd.js",
+    "test-faucet": "babel-tape-runner \"tests/*.test.js\" | ./node_modules/faucet/bin/cmd.js",
     "build": "babel src --presets babel-preset-es2015 --out-dir dist"
   },
   "author": "Zhen Lu, Eddie Lu, Paul Sabatino",
