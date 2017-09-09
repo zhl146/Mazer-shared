@@ -29,14 +29,6 @@ export default class MazeTile{
     return ( this.x === pointToCompare.x && this.y === pointToCompare.y );
   }
 
-  isWalkable() {
-    return this.type !== MazeTile.Type.Blocker;
-  };
-
-  incrementScoreMod(amount) {
-    this.scoreMod += amount;
-  }
-
   toggleType() {
     this.type = (this.type === MazeTile.Type.Empty? MazeTile.Type.Blocker: MazeTile.Type.Empty);
   }

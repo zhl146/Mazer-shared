@@ -47,15 +47,6 @@ test('testing changing of tiles in maze', assert => {
   assert.end();
 });
 
-test('testing if the maze can set a blocker', assert => {
-  const seed = Math.random();
-  const testMaze = new Maze(seed);
-  const testTile = testMaze.mazeTiles[0].find( (tile) => testMaze.isModifiable(tile) );
-  testMaze.setBlocker(testTile);
-  assert.deepEqual(testTile.type, MazeTile.Type.Blocker);
-  assert.end();
-});
-
 test('testing if the maze can determine cost correctly', assert => {
   const seed = Math.random();
   const testMaze = new Maze(seed);
