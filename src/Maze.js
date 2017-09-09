@@ -4,6 +4,7 @@ import ColorScheme from 'color-scheme';
 import Pathfinder from './Pathfinder';
 import Tile from './MazeTile';
 import Utils from './Utils';
+import Score from "./Score";
 
 export default function Maze(seed) {
   this.random = seedrandom(seed);
@@ -16,23 +17,18 @@ export default function Maze(seed) {
   this.unusedPoints = this.generateUnusedPointsArray();
   this.wayPoints = this.generateWayPoints();
   this.setWayPointTypes()
-    .generateScoreZones()
-    .generateBlockers();
-};
+      .generateScoreZones()
+      .generateBlockers();
 
-// make sure that the point is in the bounds
-// and make sure that it is empty
-Maze.prototype.isPassable = function(point) {
-  return this.contains(point) &&
-      this.mazeTiles[point.y][point.x].isWalkable();
+  this.path = this.findPath();
+  this.score = 0;
 };
 
 // make sure that the point is in the bounds
 // and make sure that it's not a waypoint (waypoints shouldn't be messed with)
 Maze.prototype.isModifiable = function(point) {
-    console.log('the point you are trying to change is: x: ' + point.x + 'y: ' + point.y)
-    if (!this.contains(point)) {console.log('maze does not contain point')}
-    if (Utils.arrayContainsPoint(this.wayPoints, point)) {console.log('this point is a waypoint')}
+  if (!this.contains(point)) {console.log('maze does not contain point')}
+  if (Utils.arrayContainsPoint(this.wayPoints, point)) {console.log('this point is a waypoint')}
   return this.contains(point) &&
       !Utils.arrayContainsPoint(this.wayPoints, point);
 };
@@ -92,10 +88,10 @@ Maze.prototype.generateWayPoints = function() {
     }
 
     pathSegment.forEach( (point) => {
-        protectedPath.push(point);
-        // we shouldn't put anything where the protected path is
-        // so they are removed from the unused points array
-        this.unusedPoints = Utils.removePointInArray(this.unusedPoints, point);
+      protectedPath.push(point);
+      // we shouldn't put anything where the protected path is
+      // so they are removed from the unused points array
+      this.unusedPoints = Utils.removePointInArray(this.unusedPoints, point);
     });
   }
 
@@ -111,21 +107,21 @@ Maze.prototype.generateWayPoints = function() {
 };
 
 Maze.prototype.setWayPointTypes = function() {
-    this.wayPoints.forEach( (waypoint, index) => {
-        if ( index === 0 ) {
-           this.setTileType( waypoint, Tile.Type.Start );
-        } else if ( index === this.wayPoints.length - 1) {
-            this.setTileType( waypoint, Tile.Type.End );
-        } else {
-            waypoint.waypointIndex = index;
-            this.setTileType( waypoint,  Tile.Type.WayPoint );
-        }
-    })
-    return this;
+  this.wayPoints.forEach( (waypoint, index) => {
+    if ( index === 0 ) {
+      this.setTileType( waypoint, Tile.Type.Start );
+    } else if ( index === this.wayPoints.length - 1) {
+      this.setTileType( waypoint, Tile.Type.End );
+    } else {
+      waypoint.waypointIndex = index;
+      this.setTileType( waypoint,  Tile.Type.WayPoint );
+    }
+  })
+  return this;
 };
 
 Maze.prototype.setTileType = function(point, type) {
-    this.mazeTiles[point.y][point.x].type = type;
+  this.mazeTiles[point.y][point.x].type = type;
 };
 
 // generates a list of tiles that should have blockers placed on them
@@ -169,10 +165,27 @@ Maze.prototype.findPath = function() {
     const segment = Pathfinder.findPath(this.wayPoints[i], this.wayPoints[i + 1], this.mazeTiles);
 
     if (segment !== []) {
-        path.push(segment);
+      path.push(segment);
     }
   }
   return path;
+};
+
+Maze.prototype.calculateScore = function() {
+  let baseMaze = new Maze(this.seed);
+
+  let scoreCalculator = new Score(baseMaze);
+
+  return scoreCalculator.calculateScore(this.path);
+
+};
+
+Maze.prototype.updateScore = function () {
+  this.score = this.calculateScore();
+};
+
+Maze.prototype.updatePath = function() {
+  this.path = this.findPath();
 };
 
 Maze.prototype.setPath = function(path) {
@@ -195,7 +208,7 @@ Maze.prototype.getUserChanges = function(userMaze) {
 
   changedMaze.forEach( (row, rowIndex) => {
     row.forEach( (column, colIndex) => {
-        //console.log(rowIndex + ',' + colIndex)
+      //console.log(rowIndex + ',' + colIndex)
       const operationType = changedMaze[rowIndex][colIndex].type - this.mazeTiles[rowIndex][colIndex].type;
       if ( operationType !== 0 ) {
         const newPoint = new Tile(colIndex, rowIndex);
@@ -324,7 +337,7 @@ Maze.prototype.doActionOnTile = function(point) {
   // to do the desired action
   const operationCost = this.operationCostForActionOnTile(tile);
   if (this.actionsUsed + operationCost > this.params.maxActionPoints) {
-      console.log("not enough action points; can't do action on tile");
+    console.log("not enough action points; can't do action on tile");
     return false;
   }
 
