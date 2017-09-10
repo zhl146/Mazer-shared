@@ -3,33 +3,90 @@ import test from 'tape';
 import Maze from '../src/Maze';
 import MazeTile from '../src/MazeTile';
 
-test('testing the constructor for mazer', assert => {
+test('testing the constructor', assert => {
   const seed = Math.random();
   const testMaze1 = new Maze(seed);
   const testMaze2 = new Maze(seed);
-  assert.notEqual(testMaze1.random, null, 'testmaze 1 has a valid random value');
+  assert.notEqual(testMaze1.random, null, 'testmaze has a valid random generator');
   assert.equal(testMaze1.random(), testMaze2.random(), 'testmaze 1 and testmaze 2 generate the same random number given the same seed');
-  assert.notEqual(testMaze1.mazeTiles, undefined);
-  assert.notEqual(testMaze1.mazeTiles, null);
+  assert.ok(testMaze1.mazeTiles, 'mazetiles exist');
+  assert.equal(testMaze1.score, 0, 'the score should start at zero');
+  assert.equal(testMaze1.actionsUsed, 0, 'there should be no actions used in a new maze');
+  assert.ok(testMaze1.params, 'params exist');
   assert.end();
 });
 
-test('testing valid path in maze', assert => {
+test('testing valid path in generated maze', assert => {
   const testMaze1 = new Maze(Math.random());
-  const path = testMaze1.findPath();
-  assert.notDeepEqual(testMaze1.findPath(), [], 'there should be a valid path between all waypoints in a maze');
-  assert.equal(testMaze1.wayPoints[0].x, path[0][0].x);
-  assert.equal(testMaze1.wayPoints[0].y, path[0][0].y);
+  assert.ok(testMaze1.path.every( segment => segment.length > 0 ), 'there should be a valid path between all waypoints in a maze');
+  assert.equal(testMaze1.wayPoints[0].x, testMaze1.path[0][0].x, 'the starting point x coordinate should be correct in the path');
+  assert.equal(testMaze1.wayPoints[0].y, testMaze1.path[0][0].y, 'the starting point y coordinate should be correct in the path');
   assert.end();
 });
 
-test('testing changing of tiles in maze', assert => {
+test('testing doActionOnTile method validation', assert => {
+  const seed = Math.random();
+  const testMaze1 = new Maze(seed);
+
+  const startPoint = testMaze1.mazeTiles.reduce( (startPoint, row) => {
+    let foundStart = row.find( tile => tile.type === MazeTile.Type.Start );
+    if (foundStart) return foundStart;
+    return startPoint;
+  }, null );
+
+  assert.equal(testMaze1.mazeTiles[testMaze1.wayPoints[0].y][testMaze1.wayPoints[0].x],
+      testMaze1.mazeTiles[startPoint.y][startPoint.x],
+      'start point should be set correctly as the first waypoint');
+
+  let testTile = testMaze1.mazeTiles[startPoint.y][startPoint.x];
+  assert.equal(testMaze1.doActionOnTile(testTile), false, 'should not be able to modify a tile that is unmodifiable');
+
+  testMaze1.actionsUsed = testMaze1.params.maxActionPoints;
+  testTile = testMaze1.mazeTiles[0].find( tile => testMaze1.isModifiable(tile) );
+  assert.equal(testMaze1.doActionOnTile(testTile), false, 'should return false due to not enough action points');
+  testMaze1.actionsUsed = 0;
+
+  let startNeighbors = [];
+  if (testMaze1.contains({y: startPoint.y + 1, x: startPoint.x}))
+  startNeighbors.push(testMaze1.mazeTiles[startPoint.y + 1][startPoint.x]);
+  if (testMaze1.contains({y: startPoint.y + 1, x: startPoint.x + 1}))
+    startNeighbors.push(testMaze1.mazeTiles[startPoint.y + 1][startPoint.x + 1]);
+  if (testMaze1.contains({y: startPoint.y , x: startPoint.x + 1}))
+    startNeighbors.push(testMaze1.mazeTiles[startPoint.y][startPoint.x + 1]);
+  if (testMaze1.contains({y: startPoint.y - 1, x: startPoint.x + 1}))
+    startNeighbors.push(testMaze1.mazeTiles[startPoint.y - 1][startPoint.x + 1]);
+  if (testMaze1.contains({y: startPoint.y - 1, x: startPoint.x}))
+    startNeighbors.push(testMaze1.mazeTiles[startPoint.y - 1][startPoint.x]);
+  if (testMaze1.contains({y: startPoint.y - 1, x: startPoint.x - 1}))
+    startNeighbors.push(testMaze1.mazeTiles[startPoint.y - 1][startPoint.x - 1]);
+  if (testMaze1.contains({y: startPoint.y, x: startPoint.x - 1}))
+    startNeighbors.push(testMaze1.mazeTiles[startPoint.y][startPoint.x - 1]);
+  if (testMaze1.contains({y: startPoint.y + 1, x: startPoint.x - 1}))
+    startNeighbors.push(testMaze1.mazeTiles[startPoint.y + 1][startPoint.x - 1]);
+
+  startNeighbors.forEach( neighbor => {
+    testMaze1.setTileType(neighbor, MazeTile.Type.Empty);
+  });
+
+  startNeighbors.forEach( (neighbor, index) => {
+    if ( index !== startNeighbors.length - 1) {
+      assert.ok(testMaze1.doActionOnTile(neighbor), 'we should be able to block all neighboring tiles except the last one');
+    } else {
+      assert.notOk(testMaze1.doActionOnTile(neighbor), 'we should not be able to block the last neighbor around the start');
+    }
+  });
+
+  assert.end();
+});
+
+test('testing getUserChanges method', assert => {
   const seed = Math.random();
   //const seed = 0.53942283843073;
   const testMaze1 = new Maze(seed);
   const userMaze = new Maze(seed);
 
-  const testTile = userMaze.mazeTiles[0].find( (tile) => userMaze.isModifiable(tile) );
+  const mazePoints = testMaze1.mazeTiles.reduce((tilesArray, columns) => tilesArray.concat(columns) , []);
+  const testTile = mazePoints.find( tile => userMaze.isModifiable(tile) );
   // console.log("testMaze1Tile: "+JSON.stringify(testMaze1.mazeTiles[testTile.y][testTile.x], null, 2));
   // console.log("ChangedMazeTile: "+JSON.stringify(userMaze.mazeTiles[testTile.y][testTile.x], null, 2));
   // console.log("TestTile: "+JSON.stringify(testTile, null, 2));
@@ -41,7 +98,6 @@ test('testing changing of tiles in maze', assert => {
   // console.log("ChangedMazeTile: "+JSON.stringify(userMaze.mazeTiles[testTile.y][testTile.x], null, 2));
   // console.log('test: '+JSON.stringify(testTile));
   // console.log('c: '+JSON.stringify(changedTile));
-  console.log(testMaze1.seed);
   assert.equal(testTile.x ,changedTile.x , "The found 'change' should be at the same x coordinate");
   assert.equal(testTile.y, changedTile.y, "The found 'change' should be at the same y coordinate");
   assert.end();

@@ -40,9 +40,7 @@ Maze.prototype.findPath = function() {
   for (let i = 0; i < this.wayPoints.length - 1; i++) {
     const segment = Pathfinder.findPath(this.wayPoints[i], this.wayPoints[i + 1], this.mazeTiles);
 
-    if (segment !== []) {
-      path.push(segment);
-    }
+    path.push(segment);
   }
   return path;
 };
