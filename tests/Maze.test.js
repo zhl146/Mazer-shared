@@ -39,11 +39,13 @@ test('testing doActionOnTile method validation', assert => {
       'start point should be set correctly as the first waypoint');
 
   let testTile = testMaze1.mazeTiles[startPoint.y][startPoint.x];
-  assert.equal(testMaze1.doActionOnTile(testTile), false, 'should not be able to modify a tile that is unmodifiable');
+  assert.equal(testMaze1.doActionOnTile(testTile), testMaze1.StatusCodes.TileUnmodifiable,
+      'should not be able to modify a tile that is unmodifiable');
 
   testMaze1.actionsUsed = testMaze1.params.maxActionPoints;
   testTile = testMaze1.mazeTiles[0].find( tile => testMaze1.isModifiable(tile) );
-  assert.equal(testMaze1.doActionOnTile(testTile), false, 'should return false due to not enough action points');
+  assert.equal(testMaze1.doActionOnTile(testTile), testMaze1.StatusCodes.NotEnoughActions,
+      'should return false due to not enough action points');
   testMaze1.actionsUsed = 0;
 
   let startNeighbors = [];
@@ -70,9 +72,11 @@ test('testing doActionOnTile method validation', assert => {
 
   startNeighbors.forEach( (neighbor, index) => {
     if ( index !== startNeighbors.length - 1) {
-      assert.ok(testMaze1.doActionOnTile(neighbor), 'we should be able to block all neighboring tiles except the last one');
+      assert.equal(testMaze1.doActionOnTile(neighbor), testMaze1.StatusCodes.Ok,
+          'we should be able to block all neighboring tiles except the last one');
     } else {
-      assert.notOk(testMaze1.doActionOnTile(neighbor), 'we should not be able to block the last neighbor around the start');
+      assert.equal(testMaze1.doActionOnTile(neighbor), testMaze1.StatusCodes.BlockedPath,
+          'we should not be able to block the last neighbor around the start');
     }
   });
 

@@ -25,6 +25,13 @@ export default function Maze(seed) {
   this.score = 0;
 };
 
+Maze.prototype.StatusCodes = {
+    Ok: 0,
+    TileUnmodifiable: 1,
+    NotEnoughActions: 2,
+    BlockedPath: 3
+};
+
 // ---------------------------------------------------------------------------------------------------------------------
 // PATHFINDING
 // ---------------------------------------------------------------------------------------------------------------------
@@ -91,7 +98,7 @@ Maze.prototype.doActionOnTile = function(point) {
   // users are not allowed to modify special tiles such as waypoints
   if(tile.type !== Tile.Type.Empty && tile.type !== Tile.Type.Blocker){
     //console.log("tile is not modifiable; can't do action on tile");
-    return false;
+    return this.StatusCodes.TileUnmodifiable;
   }
 
   // before we do anything, check if the user has enough action points
@@ -99,7 +106,7 @@ Maze.prototype.doActionOnTile = function(point) {
   const operationCost = this.operationCostForActionOnTile(tile);
   if (this.actionsUsed + operationCost > this.params.maxActionPoints) {
     //console.log("not enough action points; can't do action on tile");
-    return false;
+    return this.StatusCodes.NotEnoughActions;
   }
 
   // modify the tile type
@@ -114,7 +121,7 @@ Maze.prototype.doActionOnTile = function(point) {
     // revert changes
     tile.type = (tile.type === Tile.Type.Empty ? Tile.Type.Blocker : Tile.Type.Empty);
     this.path = backupPath;
-    return false;
+    return this.StatusCodes.BlockedPath;
   }
 
   // continue updating the maze with successful tile flip
@@ -122,7 +129,7 @@ Maze.prototype.doActionOnTile = function(point) {
   this.actionsUsed += operationCost;
   this.updateScore();
 
-  return true;
+  return this.StatusCodes.Ok;
 };
 
 Maze.prototype.setTileType = function(point, type) {
@@ -342,14 +349,10 @@ Maze.prototype.generateSeedPoints = function(numSeeds) {
 Maze.prototype.generateMazeParams = function() {
 
   const mazeColors = this.generateColors();
-
   const numColumns = Math.floor(this.generateRandomIntBetween(15, 40));
   const numRows = Math.floor(this.generateRandomIntBetween(15, 40));
-
   const size = numColumns * numRows;
-
   const numBlockerSeeds = this.generateRandomIntBetween(15, Math.floor(size / 50) );
-
   const numScoringZones = this.generateRandomIntBetween(1, Math.floor(size / 300));
 
   let numWayPoints = 1;
@@ -422,6 +425,7 @@ Maze.prototype.generateColors = function() {
 
 Maze.prototype.generateUnusedPointsArray = function() {
   // this creates a 1-D list of all points on our maze
+  // this makes it easier to keep track of what points are available for assignment
   let unusedPointsArray = [];
 
   this.mazeTiles.forEach( (column) => {
