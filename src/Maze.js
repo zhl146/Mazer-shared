@@ -132,10 +132,10 @@ Maze.prototype.doActionOnTile = function(point) {
 
   // if pathing doesn't change the score and you didn't put a blocker directly in the path
   // the path has no reason to change
-  if ( this.score === backupScore &&
-      backupPath.every( pointInPath => pointInPath.x !== point.x && pointInPath.y !== point.y )) {
-    this.path = backupPath
-  }
+  // if ( this.score === backupScore &&
+  //     backupPath.every( pointInPath => pointInPath.x !== point.x && pointInPath.y !== point.y )) {
+  //   this.path = backupPath;
+  // }
 
   return this.StatusCodes.Ok;
 };
