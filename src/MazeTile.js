@@ -1,10 +1,10 @@
 export default class MazeTile{
-  constructor(x, y, type){
+  constructor(x, y, type = MazeTile.Type.Empty){
     // coordinates
     this.x = x;
     this.y = y;
 
-    this.type = type || MazeTile.Type.Empty;
+    this.type = type;
     this.waypointIndex = null;
     // stuff for presentation
     this.userPlaced = false;
@@ -40,6 +40,5 @@ MazeTile.Type = {
   Blocker: 1,
   Start: 2,
   End: 3,
-  WayPoint: 4,
-  Path: 5
+  WayPoint: 4
 };

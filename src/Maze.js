@@ -114,6 +114,7 @@ Maze.prototype.doActionOnTile = function(point) {
 
   // check if the tile modification allows proper pathfinding
   const backupPath = this.path;
+  const backupScore = this.score;
   this.updatePath();
 
   // check if the path is blocked in at least one segment
@@ -128,6 +129,13 @@ Maze.prototype.doActionOnTile = function(point) {
   tile.userPlaced = !tile.userPlaced;
   this.actionsUsed += operationCost;
   this.updateScore();
+
+  // if pathing doesn't change the score and you didn't put a blocker directly in the path
+  // the path has no reason to change
+  if ( this.score === backupScore &&
+      backupPath.every( pointInPath => pointInPath.x !== point.x && pointInPath.y !== point.y )) {
+    this.path = backupPath
+  }
 
   return this.StatusCodes.Ok;
 };
