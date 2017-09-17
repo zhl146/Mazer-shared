@@ -23,6 +23,7 @@ export default function Maze(seed) {
   this.path = this.basePath;
   this.baseScore = Math.floor(this.calculatePathLength(this.basePath)*100);
   this.score = 0;
+  this.baseMazeTiles = this.cloneMazeTiles(this.mazeTiles);
 };
 
 Maze.prototype.StatusCodes = {
@@ -178,6 +179,10 @@ Maze.prototype.setScoreZoneCenter = function(point) {
 // UTILS
 // ---------------------------------------------------------------------------------------------------------------------
 
+Maze.prototype.cloneMazeTiles = function(mazeTiles) {
+  return mazeTiles.map( row => row.map( tile => tile.copy() ))
+};
+
 // calculates the operation cost to do an action on a tile
 Maze.prototype.operationCostForActionOnTile = function(tile) {
   let operationCost = 0;
@@ -199,24 +204,33 @@ Maze.prototype.operationCostForActionOnTile = function(tile) {
   return operationCost
 };
 
-// calculates all points that changed and the operation to change them
-Maze.prototype.getUserChanges = function(userMaze) {
-  const diffPoints = [];
-  const changedMaze = userMaze.mazeTiles;
+// resets the mazetiles back to where they started
+Maze.prototype.resetMaze = function() {
+  this.mazeTiles = this.cloneMazeTiles(this.baseMazeTiles);
+};
 
-  changedMaze.forEach( (row, rowIndex) => {
+// returns an array of objects that represent all mazetiles that were changed with respect to the base maze
+Maze.prototype.getUserChanges = function() {
+  const diffPoints = [];
+
+  this.mazeTiles.forEach( (row, rowIndex) => {
     row.forEach( (column, colIndex) => {
-      //console.log(rowIndex + ',' + colIndex)
-      const operationType = changedMaze[rowIndex][colIndex].type - this.mazeTiles[rowIndex][colIndex].type;
+      const operationType = this.mazeTiles[rowIndex][colIndex].type - this.baseMazeTiles[rowIndex][colIndex].type;
       if ( operationType !== 0 ) {
-        const newPoint = new Tile(colIndex, rowIndex);
-        newPoint.operationType = operationType;
-        diffPoints.push(newPoint);
+        diffPoints.push({x: colIndex, y: rowIndex});
       }
     })
   });
 
   return diffPoints;
+};
+
+Maze.prototype.applyUserChanges = function(diffPoints) {
+  // it only makes sense to try to apply user changes to a fresh maze, so we reset it first
+  this.resetMaze();
+  // runs doactionontile on every point in diffpoints and returns false as soon as we are not able to successfully
+  // modify the tile
+  return diffPoints.every( point => this.doActionOnTile(point) === this.StatusCodes.Ok);
 };
 
 // make sure that the point is in the bounds

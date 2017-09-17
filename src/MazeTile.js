@@ -1,19 +1,24 @@
 export default class MazeTile{
-  constructor(x, y, type = MazeTile.Type.Empty){
+  constructor(x,
+              y,
+              type = MazeTile.Type.Empty,
+              waypointIndex = null,
+              userPlaced = false,
+              scoreMod = 1,
+              scoreZoneCenter = false){
     // coordinates
     this.x = x;
     this.y = y;
 
     this.type = type;
-    this.waypointIndex = null;
+    this.waypointIndex = waypointIndex;
     // stuff for presentation
-    this.userPlaced = false;
+    this.userPlaced = userPlaced;
 
     // stuff for scoring
-    this.scoreMod = 1;
-    this.scoreZoneCenter = false;
+    this.scoreMod = scoreMod;
+    this.scoreZoneCenter = scoreZoneCenter;
   }
-
 
   calculateDistance( point ) {
     const xDiff = this.x - point.x;
@@ -22,7 +27,15 @@ export default class MazeTile{
   }
 
   copy() {
-    return new MazeTile(this.x, this.y);
+    return new MazeTile(
+        this.x,
+        this.y,
+        this.type,
+        this.waypointIndex,
+        this.userPlaced,
+        this.scoreMod,
+        this.scoreZoneCenter
+    );
   }
 
   matches(pointToCompare) {

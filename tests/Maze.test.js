@@ -87,17 +87,16 @@ test('testing getUserChanges method', assert => {
   const seed = Math.random();
   //const seed = 0.53942283843073;
   const testMaze1 = new Maze(seed);
-  const userMaze = new Maze(seed);
 
   const mazePoints = testMaze1.mazeTiles.reduce((tilesArray, columns) => tilesArray.concat(columns) , []);
-  const testTile = mazePoints.find( tile => userMaze.isModifiable(tile) );
+  const testTile = mazePoints.find( tile => testMaze1.isModifiable(tile) );
   // console.log("testMaze1Tile: "+JSON.stringify(testMaze1.mazeTiles[testTile.y][testTile.x], null, 2));
   // console.log("ChangedMazeTile: "+JSON.stringify(userMaze.mazeTiles[testTile.y][testTile.x], null, 2));
   // console.log("TestTile: "+JSON.stringify(testTile, null, 2));
 
-  userMaze.doActionOnTile(testTile);
+  testMaze1.doActionOnTile(testTile);
 
-  let changedTile = testMaze1.getUserChanges(userMaze)[0];
+  let changedTile = testMaze1.getUserChanges()[0];
   // console.log("testMaze1Tile: "+JSON.stringify(testMaze1.mazeTiles[testTile.y][testTile.x], null, 2));
   // console.log("ChangedMazeTile: "+JSON.stringify(userMaze.mazeTiles[testTile.y][testTile.x], null, 2));
   // console.log('test: '+JSON.stringify(testTile));
